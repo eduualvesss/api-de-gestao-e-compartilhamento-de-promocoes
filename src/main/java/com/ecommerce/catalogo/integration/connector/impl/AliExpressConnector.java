@@ -309,3 +309,4 @@ public class AliExpressConnector extends AbstractRetailerConnector {
                 .findFirst();
     }
 }
+

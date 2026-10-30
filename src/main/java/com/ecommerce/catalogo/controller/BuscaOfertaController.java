@@ -88,3 +88,4 @@ public class BuscaOfertaController {
                 termo, categoria, descontoMin, precoMax, selectedStores, deduplicarEntreLojas, pagina, limite);
     }
 }
+

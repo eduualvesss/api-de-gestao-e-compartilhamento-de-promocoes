@@ -323,3 +323,4 @@ public class AmazonConnector extends AbstractRetailerConnector {
                 .findFirst();
     }
 }
+

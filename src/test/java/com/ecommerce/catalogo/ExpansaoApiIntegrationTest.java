@@ -99,3 +99,4 @@ class ExpansaoApiIntegrationTest {
                 .andExpect(jsonPath("$.sku").value("SKU-TEST-01"));
     }
 }
+

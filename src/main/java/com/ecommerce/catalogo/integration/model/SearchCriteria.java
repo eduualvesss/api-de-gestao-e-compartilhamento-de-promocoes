@@ -23,3 +23,4 @@ public record SearchCriteria(
         limit = Math.min(50, Math.max(1, limit));
     }
 }
+

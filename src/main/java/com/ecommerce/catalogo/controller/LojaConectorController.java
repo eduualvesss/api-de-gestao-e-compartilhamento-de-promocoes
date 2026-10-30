@@ -88,3 +88,4 @@ public class LojaConectorController {
         return connector.checkHealth();
     }
 }
+

@@ -239,3 +239,4 @@ curl -s -X POST "http://localhost:8080/ofertas/coletar-e-filtrar?termo=JBL"
 - [ ] **Passo 5 (Prioridade 4 — Mercado Livre):** Criar aplicação em `https://developers.mercadolivre.com.br/`, executar o fluxo OAuth 2.0 inicial para obter o primeiro `refresh_token`, aderir ao Programa de Afiliados ML (`https://www.mercadolivre.com.br/l/afiliados-home`) e preencher `RETAILER_MERCADOLIVRE_*`.
 - [ ] **Passo 6 (Prioridade 5 — Amazon Brasil):** Cadastrar conta em `https://associados.amazon.com.br/`, divulgar links manuais iniciais até completar **3 vendas qualificadas**, gerar `Credential ID` e `Credential Secret` na **Creators API** (`https://affiliate-program.amazon.com/creatorsapi/docs/`) e ativar `RETAILER_AMAZON_ENABLED=true`.
 - [ ] **Passo 7 (Canais de Compartilhamento):** Criar bot no Telegram via `@BotFather` (`TELEGRAM_BOT_TOKEN`) e/ou configurar número oficial no Meta for Developers (`WHATSAPP_ACCESS_TOKEN`) para uso pela API de Compartilhamento.
+

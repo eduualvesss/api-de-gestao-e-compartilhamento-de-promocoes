@@ -4,3 +4,4 @@ import jakarta.validation.constraints.NotNull;
 
 public record AlterarModoConectorRequest(@NotNull Boolean sandboxMode) {
 }
+

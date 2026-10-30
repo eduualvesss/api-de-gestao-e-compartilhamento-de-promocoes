@@ -109,3 +109,4 @@ public class PriceAndCurrencyNormalizer {
         return "sha256:" + CryptoSigningUtils.sha256HexLower(raw);
     }
 }
+

@@ -386,3 +386,4 @@ class RetailerConnectorsUnitTest {
         assertThat(offer.urlAffiliate()).isEqualTo("https://redir.lomadee.com/v2/deeplink?id=23551100");
     }
 }
+

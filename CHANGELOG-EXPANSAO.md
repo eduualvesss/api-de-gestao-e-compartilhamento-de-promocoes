@@ -128,3 +128,4 @@ Gerado `target/catalogo-promocoes-0.0.1-SNAPSHOT.jar` (`BUILD SUCCESS`).
    - `curl.exe -s "http://localhost:18080/ofertas/busca?termo=Galaxy&deduplicarEntreLojas=true"` → **HTTP 200** com `sandboxDataIncluded: true`, `totalRawOffers: 2`, `crossStoreDuplicatesCollapsed: 1`, mantendo a oferta de menor preço efetivo (`AMAZON` R\$ 3.299,00 vs `SHOPEE` R\$ 3.499,00).
    - `curl.exe -s "http://localhost:18080/ofertas/ALIEXPRESS/1005006218991"` → **HTTP 200** retornando `UnifiedOffer` normalizada com `isInternational: true`, `estimatedImportTax: 64.64` e cupom `BRJBL15`.
    - `curl.exe -s -X POST "http://localhost:18080/ofertas/coletar-e-filtrar?termo=JBL"` → **HTTP 200** retornando as ofertas coletadas e `filterDispatch.status: "FAILED_DEGRADED"` (`Connection refused` em `http://localhost:8081/api/v1/filter/offers:evaluate-batch`), comprovando que a indisponibilidade da API de Filtros não derruba a API de Busca.
+

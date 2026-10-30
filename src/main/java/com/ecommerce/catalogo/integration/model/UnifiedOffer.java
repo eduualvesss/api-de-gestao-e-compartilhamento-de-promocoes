@@ -122,3 +122,4 @@ public record UnifiedOffer(
         return total;
     }
 }
+
