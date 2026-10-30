@@ -70,3 +70,4 @@ public class LomadeeConnectorsConfig {
                 props, resilience, normalizer, deduplicator, clock, builder.build(), mapper);
     }
 }
+

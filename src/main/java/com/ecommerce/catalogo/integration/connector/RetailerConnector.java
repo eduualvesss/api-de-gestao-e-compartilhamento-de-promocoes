@@ -39,3 +39,4 @@ public interface RetailerConnector {
     /** Retorna o diagnóstico de saúde operacional e métricas do conector. */
     ConnectorHealth checkHealth();
 }
+

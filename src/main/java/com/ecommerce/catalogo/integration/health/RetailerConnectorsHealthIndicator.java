@@ -42,3 +42,4 @@ public class RetailerConnectorsHealthIndicator implements HealthIndicator {
         return Health.up().withDetails(details).build();
     }
 }
+

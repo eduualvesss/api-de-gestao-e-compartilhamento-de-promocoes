@@ -253,3 +253,4 @@ public class LomadeeRetailerConnector extends AbstractRetailerConnector {
                 .findFirst();
     }
 }
+

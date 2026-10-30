@@ -281,3 +281,4 @@ public class IntegrationProperties {
         public void setBrandId(String brandId) { this.brandId = brandId; }
     }
 }
+

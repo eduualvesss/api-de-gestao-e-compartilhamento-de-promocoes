@@ -175,3 +175,4 @@
 - **O que mudar:** Respeitar o limite de 20 msgs/min por grupo/canal no Telegram (lendo `parameters.retry_after` em respostas HTTP 429) e 80 msgs/s no WhatsApp Cloud API, além de cooldown de 24h por `(id_loja, id_externo)`.
 - **Por quê:** Evita bloqueio/mute do bot de promoções pelo Telegram ou suspensão do número WABA pela Meta.
 - **Impacto:** Alta disponibilidade na entrega das promoções.
+

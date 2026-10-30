@@ -13,3 +13,4 @@ public record FilterDispatchOutcome(
         FilterBatchResponse filterResponse
 ) {
 }
+

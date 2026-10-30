@@ -16,3 +16,4 @@ public record FilterBatchRequest(
         List<UnifiedOffer> offers
 ) {
 }
+

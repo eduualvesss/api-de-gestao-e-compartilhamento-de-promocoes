@@ -321,3 +321,4 @@ public class MercadoLivreConnector extends AbstractRetailerConnector {
                 .findFirst();
     }
 }
+

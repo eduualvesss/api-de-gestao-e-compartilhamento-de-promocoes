@@ -19,3 +19,4 @@ public class ConnectorConfigurationException extends RuntimeException {
         return retailer;
     }
 }
+

@@ -221,3 +221,4 @@ public abstract class AbstractRetailerConnector implements RetailerConnector {
 
     protected abstract Optional<UnifiedOffer> executeSandboxGetOffer(String externalId);
 }
+
