@@ -6,6 +6,7 @@ import com.ecommerce.catalogo.integration.exception.ConnectorExecutionException;
 import com.ecommerce.catalogo.integration.model.RetailerId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
@@ -35,6 +36,7 @@ public class ConnectorResilienceExecutor {
     private final LongConsumer sleeper;
     private final Map<RetailerId, StoreState> states = new ConcurrentHashMap<>();
 
+    @Autowired
     public ConnectorResilienceExecutor(IntegrationProperties properties, Clock clock) {
         this(properties, clock, millis -> {
             try {
