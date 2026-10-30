@@ -37,3 +37,8 @@ Thumbs.db
 # Diretório e zip do maven wrapper criados localmente
 maven_dir/
 maven.zip
+
+# Variáveis de ambiente locais e segredos (nunca versionar)
+.env
+.env.*
+!.env.example

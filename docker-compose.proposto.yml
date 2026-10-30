@@ -1,0 +1,209 @@
+# ==============================================================================
+# DOCKER COMPOSE PROPOSTO — PIPELINE DE PROMOÇÕES (4 SERVIÇOS + CACHE)
+# ==============================================================================
+# Como usar apenas o Banco + Cache + API de Gestão/Busca (disponíveis hoje):
+#   cp .env.example .env
+#   docker compose -f docker-compose.proposto.yml up -d postgres redis api-busca
+#
+# Como subir o pipeline completo quando os repositórios irmãos estiverem presentes:
+#   docker compose -f docker-compose.proposto.yml --profile full-pipeline up -d
+# ==============================================================================
+
+name: pipeline-promocoes
+
+services:
+  # ----------------------------------------------------------------------------
+  # SERVIÇO 3: BANCO DE DADOS COMPARTILHADO (PostgreSQL 16)
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: promo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-catalogo}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
+      TZ: America/Sao_Paulo
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-catalogo}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - promo-net
+
+  # ----------------------------------------------------------------------------
+  # CAMADA DE CACHE E DEDUPLICAÇÃO DISTRIBUÍDA (Redis 7 - Opcional/Recomendado)
+  # ----------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: promo-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - promo-net
+
+  # ----------------------------------------------------------------------------
+  # SERVIÇO 1: API DE GESTÃO E BUSCA DE PROMOÇÕES (Este Repositório)
+  # ----------------------------------------------------------------------------
+  api-busca:
+    image: maven:3.9.9-eclipse-temurin-17
+    container_name: promo-api-busca
+    working_dir: /workspace
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dfile.encoding=UTF-8"
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8080
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-catalogo}
+      DB_USERNAME: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO:-update}
+      FILTER_API_ENABLED: ${FILTER_API_ENABLED:-false}
+      FILTER_API_BASE_URL: ${FILTER_API_BASE_URL_DOCKER:-http://api-filtros:8081}
+      FILTER_API_KEY: ${FILTER_API_KEY:-}
+      CURRENCY_USD_BRL_RATE: ${CURRENCY_USD_BRL_RATE:-5.75}
+      RETAILER_SHOPEE_ENABLED: ${RETAILER_SHOPEE_ENABLED:-true}
+      RETAILER_SHOPEE_SANDBOX_MODE: ${RETAILER_SHOPEE_SANDBOX_MODE:-false}
+      RETAILER_SHOPEE_APP_ID: ${RETAILER_SHOPEE_APP_ID:-}
+      RETAILER_SHOPEE_APP_SECRET: ${RETAILER_SHOPEE_APP_SECRET:-}
+      RETAILER_ALIEXPRESS_ENABLED: ${RETAILER_ALIEXPRESS_ENABLED:-true}
+      RETAILER_ALIEXPRESS_SANDBOX_MODE: ${RETAILER_ALIEXPRESS_SANDBOX_MODE:-false}
+      RETAILER_ALIEXPRESS_APP_KEY: ${RETAILER_ALIEXPRESS_APP_KEY:-}
+      RETAILER_ALIEXPRESS_APP_SECRET: ${RETAILER_ALIEXPRESS_APP_SECRET:-}
+      RETAILER_ALIEXPRESS_TRACKING_ID: ${RETAILER_ALIEXPRESS_TRACKING_ID:-default}
+      RETAILER_MERCADOLIVRE_ENABLED: ${RETAILER_MERCADOLIVRE_ENABLED:-false}
+      RETAILER_MERCADOLIVRE_SANDBOX_MODE: ${RETAILER_MERCADOLIVRE_SANDBOX_MODE:-false}
+      RETAILER_MERCADOLIVRE_CLIENT_ID: ${RETAILER_MERCADOLIVRE_CLIENT_ID:-}
+      RETAILER_MERCADOLIVRE_CLIENT_SECRET: ${RETAILER_MERCADOLIVRE_CLIENT_SECRET:-}
+      RETAILER_MERCADOLIVRE_ACCESS_TOKEN: ${RETAILER_MERCADOLIVRE_ACCESS_TOKEN:-}
+      RETAILER_MERCADOLIVRE_REFRESH_TOKEN: ${RETAILER_MERCADOLIVRE_REFRESH_TOKEN:-}
+      RETAILER_MERCADOLIVRE_AFFILIATE_TOOL: ${RETAILER_MERCADOLIVRE_AFFILIATE_TOOL:-}
+      RETAILER_MERCADOLIVRE_AFFILIATE_WORD: ${RETAILER_MERCADOLIVRE_AFFILIATE_WORD:-}
+      RETAILER_AMAZON_ENABLED: ${RETAILER_AMAZON_ENABLED:-false}
+      RETAILER_AMAZON_SANDBOX_MODE: ${RETAILER_AMAZON_SANDBOX_MODE:-false}
+      RETAILER_AMAZON_CREDENTIAL_ID: ${RETAILER_AMAZON_CREDENTIAL_ID:-}
+      RETAILER_AMAZON_CREDENTIAL_SECRET: ${RETAILER_AMAZON_CREDENTIAL_SECRET:-}
+      RETAILER_AMAZON_PARTNER_TAG: ${RETAILER_AMAZON_PARTNER_TAG:-}
+      LOMADEE_API_KEY: ${LOMADEE_API_KEY:-}
+      LOMADEE_SOURCE_ID: ${LOMADEE_SOURCE_ID:-}
+      RETAILER_MAGALU_ENABLED: ${RETAILER_MAGALU_ENABLED:-false}
+      RETAILER_MAGALU_SANDBOX_MODE: ${RETAILER_MAGALU_SANDBOX_MODE:-false}
+      RETAILER_KABUM_ENABLED: ${RETAILER_KABUM_ENABLED:-false}
+      RETAILER_KABUM_SANDBOX_MODE: ${RETAILER_KABUM_SANDBOX_MODE:-false}
+      RETAILER_CASASBAHIA_ENABLED: ${RETAILER_CASASBAHIA_ENABLED:-false}
+      RETAILER_CASASBAHIA_SANDBOX_MODE: ${RETAILER_CASASBAHIA_SANDBOX_MODE:-false}
+      RETAILER_AMERICANAS_ENABLED: ${RETAILER_AMERICANAS_ENABLED:-false}
+      RETAILER_AMERICANAS_SANDBOX_MODE: ${RETAILER_AMERICANAS_SANDBOX_MODE:-false}
+      RETAILER_NETSHOES_ENABLED: ${RETAILER_NETSHOES_ENABLED:-false}
+      RETAILER_NETSHOES_SANDBOX_MODE: ${RETAILER_NETSHOES_SANDBOX_MODE:-false}
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    volumes:
+      - ./:/workspace
+      - maven_repo:/root/.m2
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks:
+      - promo-net
+
+  # ----------------------------------------------------------------------------
+  # SERVIÇO 2: API DE FILTROS (Premissa Arquitetural - Fora deste repositório)
+  # Habilitado com --profile full-pipeline quando ../api-filtros existir
+  # ----------------------------------------------------------------------------
+  api-filtros:
+    profiles: ["full-pipeline"]
+    build:
+      context: ../api-filtros
+    container_name: promo-api-filtros
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8081
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-catalogo}
+      DB_USERNAME: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      FILTER_INTERNAL_API_KEY: ${FILTER_INTERNAL_API_KEY}
+      FILTER_MIN_REAL_DISCOUNT_PCT: ${FILTER_MIN_REAL_DISCOUNT_PCT:-15.0}
+      FILTER_MIN_RATING: ${FILTER_MIN_RATING:-4.2}
+      FILTER_MIN_STOCK: ${FILTER_MIN_STOCK:-3}
+      SHARE_API_BASE_URL: http://api-compartilhamento:8082
+      SHARE_INTERNAL_API_KEY: ${SHARE_INTERNAL_API_KEY:-}
+    ports:
+      - "${FILTER_SERVER_PORT:-8081}:8081"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8081/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+    networks:
+      - promo-net
+
+  # ----------------------------------------------------------------------------
+  # SERVIÇO 4: API DE COMPARTILHAMENTO (Premissa Arquitetural - Fora deste repo)
+  # Habilitado com --profile full-pipeline quando ../api-compartilhamento existir
+  # ----------------------------------------------------------------------------
+  api-compartilhamento:
+    profiles: ["full-pipeline"]
+    build:
+      context: ../api-compartilhamento
+    container_name: promo-api-compartilhamento
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api-busca:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8082
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-catalogo}
+      DB_USERNAME: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      SEARCH_API_BASE_URL: http://api-busca:8080
+      SHARE_INTERNAL_API_KEY: ${SHARE_INTERNAL_API_KEY:-}
+      TELEGRAM_ENABLED: ${TELEGRAM_ENABLED:-false}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      WHATSAPP_ENABLED: ${WHATSAPP_ENABLED:-false}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+      WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN:-}
+    ports:
+      - "${SHARE_SERVER_PORT:-8082}:8082"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8082/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+    networks:
+      - promo-net
+
+volumes:
+  postgres_data:
+  redis_data:
+  maven_repo:
+
+networks:
+  promo-net:
+    driver: bridge
