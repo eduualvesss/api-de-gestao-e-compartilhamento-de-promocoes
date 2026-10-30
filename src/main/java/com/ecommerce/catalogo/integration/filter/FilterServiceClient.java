@@ -39,11 +39,7 @@ public class FilterServiceClient {
         this.properties = properties;
         this.clock = clock;
         this.applicationName = applicationName;
-
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(properties.getFilterApi().getConnectTimeoutMs());
-        factory.setReadTimeout(properties.getFilterApi().getReadTimeoutMs());
-        this.restClient = restClientBuilder.clone().requestFactory(factory).build();
+        this.restClient = restClientBuilder.build();
     }
 
     public FilterDispatchOutcome dispatchBatch(List<UnifiedOffer> offers, String correlationId) {
